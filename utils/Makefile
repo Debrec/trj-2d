@@ -1,26 +1,26 @@
-PRGSTR=strgrid
+#PRGSTR=strgrid
 PRGRD=trjread
 
-SRCSTR=strgridmain.f90 ../f90trj/stereograph.f90
+#SRCSTR=strgridmain.f90 ../f90trj/stereograph.f90
 SRCRD=../f90trj/date_conv.f90 trj_netcdf_r.f90
 
 F95=gfortran
 
 FFLAGS=-fdefault-real-8 -fbounds-check
 
-LIBS=-L/lib -L/usr/lib -L../Lib -lnetcdff -lslatec
-INCLUDES = -I/usr/include
+LIBS=-L/lib -L/usr/local/lib -L../Lib -lnetcdff
+INCLUDES = -I/usr/local/include
 
 #all : $(SOURCE)
 #	$(F95) $(FFLAGS) $(INCLUDES) $(SOURCE) -o $(PROGRAM) $(LIBS)
 #
 
 all : $(SRCSTR) $(SRCRD)
-	$(F95) $(FFLAGS) $(INCLUDES) $(SRCSTR) -o $(PRGSTR) $(LIBS)
+	#$(F95) $(FFLAGS) $(INCLUDES) $(SRCSTR) -o $(PRGSTR) $(LIBS)
 	$(F95) $(FFLAGS) $(INCLUDES) $(SRCRD) -o $(PRGRD) $(LIBS)
 
-$(PRGSTR) : $(SRCSTR)
-	$(F95) $(FFLAGS) $(INCLUDES) $(SRCSTR) -o $(PRGSTR) $(LIBS)
+#$(PRGSTR) : $(SRCSTR)
+#	$(F95) $(FFLAGS) $(INCLUDES) $(SRCSTR) -o $(PRGSTR) $(LIBS)
 
 $(PRGRD) : $(SRCRD)
 	$(F95) $(FFLAGS) $(INCLUDES) $(SRCRD) -o $(PRGRD) $(LIBS)

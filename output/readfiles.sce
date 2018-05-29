@@ -1,4 +1,4 @@
-for i=1:10
+for i=1:21
   archivo = 'trjmd' + string(i) + '.dat';
   dat = read(archivo,-1,6);
   for j=1:333
