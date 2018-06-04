@@ -1,0 +1,13 @@
+input/*.nc
+input/*.dat
+output/*.nc
+output/*.dat
+*.exe
+f90trj/*.mod
+output/*.png
+output/*.txt
+utils/*.mod
+doc/*.odt
+utils/trjread
+trj
+f90trj/trj-2d
