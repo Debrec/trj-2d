@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-extern "C" void trj_();
+extern "C" void trj_main_();
 
 class datos {
 public:
@@ -243,7 +243,7 @@ class Worker {
           Glib::Mutex::Lock lock (mutex);
           if (stop) break;
         }
-        trj_();
+        trj_main_();
         sig_done();
         break;
       }
