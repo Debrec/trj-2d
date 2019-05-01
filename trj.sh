@@ -1,23 +1,16 @@
 #!/bin/sh
 
-#export LD_LIBRARY_PATH=/usr/local/lib
+export LD_LIBRARY_PATH=/home/hernan/netcdf/lib
 
 PROGRAM=trj
-GUI=trjwgui
+GUIGTK=trjgtk
 
 SRCPATH=f90trj
 
 rm $SRCPATH/*.o
 rm $SRCPATH/*.mod
 
-#if ["$1" == 'gui']; then 
-#    make -f f90trj/Makefile.gefortran
-#    mv $SRCPATH/$GUI .
-#elif ["$1" == 'gfortran']; then
-#    make -f r90trj/Makefile.congui
-#    mv $SRCPATH/$PROGRAM .
-#else 
-    make -C f90trj
-    mv $SRCPATH/$GUI .
-    mv $SRCPATH/$PROGRAM .
-#fi
+make -C f90trj
+mv $SRCPATH/$GUIGTK .
+mv $SRCPATH/$PROGRAM .
+
