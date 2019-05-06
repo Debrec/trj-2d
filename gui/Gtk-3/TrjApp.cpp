@@ -198,9 +198,9 @@ int changeData() {
 Gtk::ApplicationWindow* pMw = nullptr;
 
 void salir()
-{
-  if(pMw)
-    pMw->hide();
+{	
+  if (pMw)
+	  pMw->hide();
 }
 
 void guardar() {
@@ -208,130 +208,191 @@ void guardar() {
   GuardarArchivo("trj-2d.cfg",data);
 }
 
+Gtk::ProgressBar* pBarra = nullptr;
+Gtk::Button* pRun = nullptr;
+Gtk::Button* pPausar = nullptr;
+Gtk::Button* pReasumir = nullptr;
+
+void continuar() {
+	pRun->set_label("Running..");
+	pReasumir->set_sensitive(false);
+	pPausar->set_sensitive(true);
+	std::ofstream out("status.dat");
+	out<<0<<std::endl;		
+	out.close();
+}
+
+void pausar() {
+	pRun->set_label("Paused..");
+	pReasumir->set_sensitive(true);
+	pPausar->set_sensitive(false);
+	std::ofstream out("status.dat");
+	out<<1<<std::endl;		
+	out.close();			
+}
+
 class Worker {
   public:
  
-    Worker() : thread(0), stop(false) {}
+    Worker() : thread1(0),thread2(0) {
+	  std::ofstream out("status.dat");
+	  out<<0<<std::endl;
+	  out.close();	
+	  out.open("pbar.dat");
+	  out<<0<<std::endl;
+	  out.close();		
+	}
  
     // Called to start the processing on the thread
     void start () {
-      thread = Glib::Thread::create(sigc::mem_fun(*this, &Worker::run), true);
+      thread1 = Glib::Thread::create(sigc::mem_fun(*this, &Worker::run), true);
+      thread2 = Glib::Thread::create(sigc::mem_fun(*this, &Worker::readpercent), true);
     }
  
-    // When shutting down, we need to stop the thread
     ~Worker() {
-      {
-        Glib::Mutex::Lock lock (mutex);
-        stop = true;
-      }
-      if (thread)
-        thread->join(); // Here we block to truly wait for the thread to complete
-    }
+      if (thread1)
+        thread1->join();
+
+	  if(thread2)
+		thread2->join();    
+	}
  
     Glib::Dispatcher sig_done;
  
   protected:
-	Glib::Thread * thread;
-    Glib::Mutex mutex;
-    bool stop;
+	Glib::Thread * thread1;
+	Glib::Thread * thread2;
 
-    // This is where the real work happens
     void run () {
- 
-      while(true) {
-        {
-          Glib::Mutex::Lock lock (mutex);
-          if (stop) break;
-        }
         trj_main_();
         sig_done();
-        break;
-      }
     }
+
+	void readpercent() {
+		int percent = 0,percentp=0;
+		do {
+			std::ifstream in("pbar.dat");
+			in>>percent;
+			in.close();
+			if (percent != percentp) {				
+				pBarra->set_fraction(percent/100.);						
+				percentp = percent;
+				sleep(2);	
+			}
+		} while (percent<100);
+	}
 };
 
-class model {
+class Model {
 	public:	
 	Worker * w;
 
-	model () {
+	Model () {
 		w=NULL;		
 	}
 
+	~Model () {
+		delete w;
+		w = NULL;
+	}
+	
+
 	void run_model() {
 		w = new Worker();
-    	w->sig_done.connect(sigc::mem_fun(*this, &model::Done));
+    	w->sig_done.connect(sigc::mem_fun(*this, &Model::Done));
     	w->start();
+		pRun->set_label("Running..");
+		pRun->set_sensitive(false);
+		pReasumir->set_sensitive(false);		
 	}
 
 	void Done () {
       delete w;
       w = NULL;
+	  pRun->set_label("Stop!!!");
+	  pPausar->set_sensitive(false);		
     }
  
 };
 
 int main (int argc, char **argv)
 {
-  auto app = Gtk::Application::create(argc, argv, "trj.cfg");
+  	//if(!Glib::thread_supported()) Glib::thread_init();
+  
+  	auto app = Gtk::Application::create(argc, argv, "trj.cfg");
 
-  //Load the GtkBuilder file and instantiate its widgets:
-  refBuilder = Gtk::Builder::create();
-  try
-  {
-    refBuilder->add_from_file("TrjApp.glade");
-  }
-  catch(const Glib::FileError& ex)
-  {
-    std::cerr << "FileError: " << ex.what() << std::endl;
-    return 1;
-  }
-  catch(const Glib::MarkupError& ex)
-  {
-    std::cerr << "MarkupError: " << ex.what() << std::endl;
-    return 1;
-  }
-  catch(const Gtk::BuilderError& ex)
-  {
-    std::cerr << "BuilderError: " << ex.what() << std::endl;
-    return 1;
-  }
+  	//Load the GtkBuilder file and instantiate its widgets:
+  	refBuilder = Gtk::Builder::create();
+  	try
+ 	 {
+    	refBuilder->add_from_file("TrjApp.glade");
+ 	 }
+  	catch(const Glib::FileError& ex)
+  	{
+    	std::cerr << "FileError: " << ex.what() << std::endl;
+    	return 1;
+  	}
+ 	 catch(const Glib::MarkupError& ex)
+  	{
+    	std::cerr << "MarkupError: " << ex.what() << std::endl;
+    	return 1;
+  	}
+  	catch(const Gtk::BuilderError& ex)
+  	{
+    	std::cerr << "BuilderError: " << ex.what() << std::endl;
+    	return 1;
+  	}
 
-  //Get the GtkBuilder-instantiated Window:
-  refBuilder->get_widget("TrjApp", pMw);
-  if(pMw)
-  {
-    LeerArchivo("trj-2d.cfg",data);
-    Resetear();
+  	//Get the GtkBuilder-instantiated Window:
+  	refBuilder->get_widget("TrjApp", pMw);
+  	if(pMw)
+  	{
+    	LeerArchivo("trj-2d.cfg",data);
+    	Resetear();
  
-    Gtk::Button* pSalir = nullptr;
-    refBuilder->get_widget("Salir", pSalir);
+    	Gtk::Button* pSalir = nullptr;
+    	refBuilder->get_widget("Salir", pSalir);
     
-    if(pSalir)
-    {
-      pSalir->signal_clicked().connect(sigc::ptr_fun(&salir) );
-    }
+    	if(pSalir)
+   	    {
+    	  pSalir->signal_clicked().connect(sigc::ptr_fun(&salir));
+    	}
     
-    Gtk::Button* pGuardar = nullptr;
-    refBuilder->get_widget("Guardar", pGuardar);
+    	Gtk::Button* pGuardar = nullptr;
+    	refBuilder->get_widget("Guardar", pGuardar);
     
-    if(pGuardar)
-    {
-      pGuardar->signal_clicked().connect(sigc::ptr_fun(&guardar) );
-    }
+  		if(pGuardar)
+   		{
+      		pGuardar->signal_clicked().connect(sigc::ptr_fun(&guardar) );
+   		}
 
-	Gtk::Button* pRun = nullptr;
-	refBuilder->get_widget("Run",pRun);
-	model m;
-	if(pRun) {
-		pRun->signal_clicked().connect(sigc::mem_fun(m,&model::run_model));
-	}
+		refBuilder->get_widget("barraperc",pBarra);
+
+		Model m;
+
+		refBuilder->get_widget("Run",pRun);
+		if(pRun) {
+			pRun->signal_clicked().connect(sigc::mem_fun(m,&Model::run_model));
+		}
+
+	    refBuilder->get_widget("Pausar", pPausar);
+    
+	    if(pPausar)
+	    {
+	      pPausar->signal_clicked().connect(sigc::ptr_fun(&pausar));
+	    }
+
+	    refBuilder->get_widget("Reasumir", pReasumir);
+    
+	    if(pReasumir)
+	    {
+	      pReasumir->signal_clicked().connect(sigc::ptr_fun(&continuar));
+	    }
  	
-	
-    app->run(*pMw);
-  }
+		app->run(*pMw);
+	  }
 
-  delete pMw;
+  	  delete pMw;
 
-  return 0;
+	return 0;
 }

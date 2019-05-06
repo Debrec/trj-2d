@@ -251,12 +251,24 @@ END MODULE trj_main_mod
 SUBROUTINE trj_main
   USE trj_main_mod
   IMPLICIT none
-  INTEGER I
+  INTEGER I, ST
 
   CALL trj_init
 
   DO I=1,Ntime-1
      CALL trj1(I)
+	 OPEN(13,FILE='pbar.dat')
+		WRITE(13,*)100*I/(Ntime-1)
+	 CLOSE(13)
+	 OPEN(13,FILE='status.dat')
+		READ(13,*) ST
+	 CLOSE(13)	
+	 DO WHILE (ST .EQ. 1 )
+		CALL SLEEP(5) 
+		OPEN(13,FILE='status.dat')
+			READ(13,*) ST
+		CLOSE(13)	
+	 END DO
   END DO
 
   OPEN(13,FILE='input/temp_trj.dat')
