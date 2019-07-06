@@ -130,7 +130,7 @@
                   <object class="GtkLabel" id="NpartxLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Npartx</property>
+                    <property name="label" translatable="yes">NLonx</property>
                   </object>
                 </child>
               </object>
@@ -165,7 +165,7 @@
                   <object class="GtkLabel" id="NpartyLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Nparty</property>
+                    <property name="label" translatable="yes">NLaty</property>
                   </object>
                 </child>
               </object>
