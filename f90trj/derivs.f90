@@ -14,8 +14,7 @@
 !-----------------------------------------------------------------------
       SUBROUTINE derivs(time,y,Dydt)
 !-----------------------------------------------------------------------
-      USE particle, ONLY : U_part,V_part,lat_part,long_part,latcheck2
-      USE thsurf, ONLY : update
+      USE particle, ONLY : U_part,V_part,lat_part,long_part,latcheck2, update
       USE parametros, ONLY : DegToR, Rt
 
 !-----------------------------------------------------------------------

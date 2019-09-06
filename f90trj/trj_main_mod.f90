@@ -20,7 +20,6 @@ MODULE trj_main_mod
   INTEGER isec,day,mon,year ! initial date
   REAL theta,rtime,irtime ! theta surface
   INTEGER :: its, ncid_trj  !its (time step, (min)), ncid_trj (netcdf id)
-
   PUBLIC :: trj_init, trj_calc, trj_finish
 
 CONTAINS
@@ -112,12 +111,11 @@ CONTAINS
   SUBROUTINE trj_calc(time)
     !--------------------------------------------------------------------
     USE date_conv, ONLY : jul2greg
-    USE winds, ONLY : updatew
-    USE parametros
-    USE thsurf, ONLY : update,T_surf,P_surf,dive_surf,lat_surf, &
+    USE winds, ONLY : updatew, nx, ny, T_surf,P_surf,lat_surf, &
          long_surf
+    USE parametros
     USE particle, ONLY : lat_part,long_part,trayect,T_part,P_part,&
-         latcheck2,U_part,V_part,pv_part,o3_part
+         latcheck2,U_part,V_part,pv_part,o3_part, update
 
 
     !--------------------------------------------------------------------
@@ -262,12 +260,12 @@ SUBROUTINE trj_main
 	 CLOSE(13)
 	 OPEN(13,FILE='status.dat')
 		READ(13,*) ST
-	 CLOSE(13)	
+	 CLOSE(13)
 	 DO WHILE (ST .EQ. 1 )
-		CALL SLEEP(5) 
+		CALL SLEEP(5)
 		OPEN(13,FILE='status.dat')
 			READ(13,*) ST
-		CLOSE(13)	
+		CLOSE(13)
 	 END DO
   END DO
 

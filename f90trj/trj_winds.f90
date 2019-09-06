@@ -13,14 +13,16 @@ MODULE winds
   IMPLICIT none
   SAVE
   REAL, ALLOCATABLE :: U(:,:,:,:),V(:,:,:,:)
-  REAL, ALLOCATABLE :: PV(:,:,:,:),O3(:,:,:,:)
   REAL, ALLOCATABLE :: T(:,:,:,:), P(:),lon(:),lat(:),time(:)
 
   REAL, ALLOCATABLE :: Us(:,:,:),Vs(:,:,:)
-  REAL, ALLOCATABLE :: PVs(:,:,:),O3s(:,:,:)
   REAL, ALLOCATABLE :: Ts(:,:,:), Ps(:,:,:)
 
-  INTEGER :: nx, ny, nz, nt
+  REAL, ALLOCATABLE, PUBLIC :: U_surf(:,:),V_surf(:,:), Alt_surf(:,:)
+  REAL, ALLOCATABLE, PUBLIC :: lat_surf(:,:) , long_surf(:,:)
+  REAL, ALLOCATABLE, PUBLIC :: T_surf(:,:),P_surf(:,:), th_surf
+
+  INTEGER, PUBLIC :: nx, ny, nz, nt
 
   CHARACTER*40, PUBLIC :: filein,filetrc
 
@@ -55,13 +57,16 @@ CONTAINS
 
     !Allocate space for matrix data
     ALLOCATE(U(nx,ny,nz,2),V(nx,ny,nz,2))
-    ALLOCATE(PV(nx,ny,nz,2),T(nx,ny,nz,2),O3(nx,ny,nz,2))
+    ALLOCATE(T(nx,ny,nz,2))
     ALLOCATE(lon(nx),lat(ny),P(nz))
     ALLOCATE(time(nro(4)))
 
     ALLOCATE(Us(nx,ny,2),Vs(nx,ny,2))
-    ALLOCATE(PVs(nx,ny,2),Ts(nx,ny,2))
-    ALLOCATE(O3s(nx,ny,2),Ps(nx,ny,2))
+    ALLOCATE(Ts(nx,ny,2),Ps(nx,ny,2))
+
+    ALLOCATE(U_surf(nx+1,ny),V_surf(nx+1,ny))
+    ALLOCATE(T_surf(nx+1,ny),P_surf(nx+1,ny))
+    ALLOCATE(lat_surf(nx+1,ny),long_surf(nx+1,ny))
 
     !Read dimensions data
     CALL read_dim_ecmwf_nc_file(filein, &
@@ -92,7 +97,7 @@ CONTAINS
     CALL read_ecmwf_nc_file(filein,'t',T,units,nro,it1,it2)
   	CALL read_ecmwf_nc_file(filein,'u',U,units,nro,it1,it2)
     CALL read_ecmwf_nc_file(filein,'v',V,units,nro,it1,it2)
-    CALL read_ecmwf_nc_file(filetrc,'pv',PV,units,nro,it1,it2)
+  !  CALL read_ecmwf_nc_file(filetrc,'pv',PV,units,nro,it1,it2)
 
   END SUBROUTINE read_curr
 
@@ -100,9 +105,9 @@ CONTAINS
   !temperature surface, and times.
   SUBROUTINE updatew(theta,rtime)
     USE ptotheta
-    USE thsurf
-    USE parametros
+!    USE parametros
     IMPLICIT none
+
     REAL, INTENT(IN):: theta,rtime      ! selected potential temperature level
 
     REAL Tpr(nz),Ppr(nz),Varpr(nz)  ! Store temporal profiles
@@ -145,8 +150,8 @@ CONTAINS
           Ts(I,J,1)=p2theta(Ppr,Tpr,theta,Varpr,nz)
           Varpr(1:nz)=P(1:nz)
           Ps(I,J,1)=p2theta(Ppr,Tpr,theta,Varpr,nz)
-          Varpr(1:nz)=PV(I,J,1:nz,1)
-          PVs(I,J,1)=p2theta(Ppr,Tpr,theta,Varpr,nz)
+          !Varpr(1:nz)=PV(I,J,1:nz,1)
+          !PVs(I,J,1)=p2theta(Ppr,Tpr,theta,Varpr,nz)
           !Varpr(1:nz)=O3(I,J,1:nz,1)
           !O3s(I,J,1)=p2theta(Ppr,Tpr,theta,Varpr,nz)
           Varpr(1:nz)=U(I,J,1:nz,1)
@@ -161,8 +166,8 @@ CONTAINS
           Ts(I,J,2)=p2theta(Ppr,Tpr,theta,Varpr,nz)
           Varpr(1:nz)=P(1:nz)
           Ps(I,J,2)=p2theta(Ppr,Tpr,theta,Varpr,nz)
-          Varpr(1:nz)=PV(I,J,1:nz,2)
-          PVs(I,J,2)=p2theta(Ppr,Tpr,theta,Varpr,nz)
+          !Varpr(1:nz)=PV(I,J,1:nz,2)
+          !PVs(I,J,2)=p2theta(Ppr,Tpr,theta,Varpr,nz)
           !Varpr(1:nz)=O3(I,J,1:nz,2)
           !O3s(I,J,2)=p2theta(Ppr,Tpr,theta,Varpr,nz)
           Varpr(1:nz)=U(I,J,1:nz,2)
@@ -178,7 +183,7 @@ CONTAINS
           DO j=1,ny
              T_surf(I,J)=intp1d(rt1,rt2,rtime,Ts(I,J,:))
              P_surf(I,J)=intp1d(rt1,rt2,rtime,Ps(I,J,:))
-             PV_surf(I,J)=intp1d(rt1,rt2,rtime,PVs(I,J,:))
+             !PV_surf(I,J)=intp1d(rt1,rt2,rtime,PVs(I,J,:))
              !O3_surf(I,J)=intp1d(rt1,rt2,rtime,O3s(I,J,:))
              U_surf(I,J)=intp1d(rt1,rt2,rtime,Us(I,J,:))
              V_surf(I,J)=intp1d(rt1,rt2,rtime,Vs(I,J,:))
@@ -191,7 +196,7 @@ CONTAINS
           lat_surf(nx+1,J)=lat(1)
           long_surf(nx+1,J)=360.
           P_surf(nx+1,J)=intp1d(rt1,rt2,rtime,Ps(1,J,:))
-          pv_surf(nx+1,J)=intp1d(rt1,rt2,rtime,PVs(1,J,:))
+          !pv_surf(nx+1,J)=intp1d(rt1,rt2,rtime,PVs(1,J,:))
          ! O3_surf(nx+1,J)=intp1d(rt1,rt2,rtime,O3s(1,J,:))
           U_surf(nx+1,J)=intp1d(rt1,rt2,rtime,Us(1,J,:))
           V_surf(nx+1,J)=intp1d(rt1,rt2,rtime,Vs(1,J,:))
@@ -200,7 +205,7 @@ CONTAINS
        th_surf=theta
        T_surf(1:nx,1:ny)=Ts(1:nx,1:ny,1)
        P_surf(1:nx,1:ny)=Ps(1:nx,1:ny,1)
-       PV_surf(1:nx,1:ny)=PVs(1:nx,1:ny,1)
+       !PV_surf(1:nx,1:ny)=PVs(1:nx,1:ny,1)
        !O3_surf(1:nx,1:ny)=O3s(1:nx,1:ny,1)
        U_surf(1:nx,1:ny)=Us(1:nx,1:ny,1)
        V_surf(1:nx,1:ny)=Vs(1:nx,1:ny,1)
@@ -215,7 +220,7 @@ CONTAINS
        lat_surf(nx+1,1:ny)=lat(1:ny)
        long_surf(nx+1,1:ny)=360.
        P_surf(nx+1,1:ny)=Ps(1,1:ny,1)
-       pv_surf(nx+1,1:ny)=PVs(1,1:ny,1)
+       !pv_surf(nx+1,1:ny)=PVs(1,1:ny,1)
        !O3_surf(nx+1,1:ny)=O3s(1,1:ny,1)
        U_surf(nx+1,1:ny)=Us(1,1:ny,1)
        V_surf(nx+1,1:ny)=Vs(1,1:ny,1)
@@ -226,8 +231,10 @@ CONTAINS
 
   SUBROUTINE winds_finish
 
-    DEALLOCATE(U,V,P,T,PV,O3,time)
-    DEALLOCATE(Us,Vs,Ps,Ts,PVs,O3s)
+    DEALLOCATE(U,V,P,T,time)
+    DEALLOCATE(Us,Vs,Ps,Ts)
+    DEALLOCATE(U_surf,V_surf,T_surf,P_surf)
+    DEALLOCATE(long_surf,lat_surf)
 
   END SUBROUTINE winds_finish
 

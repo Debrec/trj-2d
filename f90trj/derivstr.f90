@@ -16,8 +16,7 @@
       SUBROUTINE derivstr(time,y,Dydt)
 !----------------------------------------------------------------------
       USE particle, ONLY : U_part,V_part,lat_part,long_part,latcheck2,&
-                           xstr_part,ystr_part
-      USE thsurf, ONLY : update
+                           xstr_part,ystr_part, update
       USE parametros, ONLY : DegToR, Rt
 
 !----------------------------------------------------------------------
@@ -48,8 +47,7 @@
       SUBROUTINE derivstrN(time,y,Dydt)
 !----------------------------------------------------------------------
       USE particle, ONLY : U_part,V_part,lat_part,long_part,latcheck2,&
-                           xstr_part,ystr_part
-      USE thsurf, ONLY : update
+                           xstr_part,ystr_part, update
       USE parametros, ONLY : DegToR, Rt
 
 !----------------------------------------------------------------------
@@ -72,5 +70,3 @@
 
       END SUBROUTINE derivstrN
 !----------------------------------------------------------------------
-
-

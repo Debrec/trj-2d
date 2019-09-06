@@ -1,9 +1,9 @@
 !----------------------------------------------------------------------
 !----------------------------------------------------------------------
-! Febrero, 2015
+! Septiembre , 2019
 ! Modulos Para el calculo de trayectorias
 ! Autor : Hernán H. G. Braile
-! Email : hbraile@gmail.com
+! Email : debrec28@gmail.com
 !----------------------------------------------------------------------
 !----------------------------------------------------------------------
 !----------------------------------------------------------------------
@@ -53,6 +53,8 @@ MODULE particle
   REAL, SAVE :: lat_part , long_part, Alt_part
   REAL, SAVE :: xstr_part,ystr_part
   REAL, SAVE :: P_part, T_part, Theta_part,pv_part,o3_part
+
+  PUBLIC :: update
 
   !----------------------------------------------------------------------
 CONTAINS
@@ -135,45 +137,13 @@ CONTAINS
 
   END SUBROUTINE Latcheck2
 
-END MODULE particle
-!----------------------------------------------------------------------
-
-!//////////////////////////////////////////////////////////////////////
-
-!----------------------------------------------------------------------
-!      Propiedades sobre una superficie
-!      de Theta constante en una grilla nx*ny  x --> long, y --> lat
-!
-!----------------------------------------------------------------------
-
-MODULE thsurf
-  USE Particle
-  IMPLICIT none
-  PRIVATE
-  INTEGER :: nx,ny,indx,indy
-  PARAMETER (nx=145,ny=73)
-
-  INTEGER, SAVE :: intpm
-  ! For the interpolation the fields must be periodic in longitud
-  ! field(nx;:)=field(1,:)
-  REAL, SAVE, PUBLIC :: U_surf(nx,ny),V_surf(nx,ny), Alt_surf(nx,ny)
-  REAL, SAVE, PUBLIC :: lat_surf(nx,ny) , long_surf(nx,ny)
-  REAL, SAVE, PUBLIC :: T_surf(nx,ny),P_surf(nx,ny), th_surf
-  REAL, SAVE, PUBLIC :: dive_surf(nx,ny),pv_surf(nx,ny),o3_surf(nx,ny)
-  REAL, SAVE :: U2a(nx,ny),V2a(nx,ny),Alt2a(nx,ny),P2a(nx,ny),&
-       T2a(nx,ny)
-  PUBLIC :: update
-
-  !----------------------------------------------------------------------
-CONTAINS
-  !-----------------------------------------------------------------------
-
-  ! Interpolate meteorological winds to requiered position
-  ! for a particle
   SUBROUTINE update()
-		use interpolacion
-		IMPLICIT none
+    use interpolacion, ONLY : intp2d
+    use winds, ONLY : long_surf,lat_surf,U_surf, V_surf,P_surf, T_surf, nx, ny, &
+                      th_surf
+    IMPLICIT none
     REAL olat,olong
+    INTEGER intpm
     !EXTERNAL interp2
 
     CALL rangcheck(olong,olat)
@@ -183,48 +153,48 @@ CONTAINS
     intpm=2
 
     IF(intpm.EQ.1) THEN
-       CALL interp2P(olong,olat,U_part,long_surf(1:nx,1),&
-            lat_surf(1,1:ny),U_surf,nx,ny)
+  !     CALL interp2P(olong,olat,U_part,long_surf(1:(nx+1),1),&
+  !          lat_surf(1,1:ny),U_surf,(nx+1),ny)
 
-       CALL interp2P(olong,olat,V_part,long_surf(1:nx,1),&
-            lat_surf(1,1:ny),V_surf,nx,ny)
+  !     CALL interp2P(olong,olat,V_part,long_surf(1:(nx+1),1),&
+  !          lat_surf(1,1:ny),V_surf,(nx+1),ny)
 
-       CALL interp2P(olong,olat,T_part,long_surf(1:nx,1),&
-            lat_surf(1,1:ny),T_surf,nx,ny)
+  !     CALL interp2P(olong,olat,T_part,long_surf(1:(nx+1),1),&
+  !          lat_surf(1,1:ny),T_surf,(nx+1),ny)
 
-       CALL interp2P(olong,olat,P_part,long_surf(1:nx,1),&
-            lat_surf(1,1:ny),P_surf,nx,ny)
+  !     CALL interp2P(olong,olat,P_part,long_surf(1:(nx+1),1),&
+  !          lat_surf(1,1:ny),P_surf,(nx+1),ny)
 
-       CALL interp2P(olong,olat,Alt_part,long_surf(1:nx,1),&
-            lat_surf(1,1:ny),Alt_surf,nx,ny)
-
-       CALL interp2P(olong,olat,pv_part,long_surf(1:nx,1),&
-            lat_surf(1,1:ny),pv_surf,nx,ny)
-
-       CALL interp2P(olong,olat,o3_part,long_surf(1:nx,1),&
-            lat_surf(1,1:ny),o3_surf,nx,ny)
+       ! CALL interp2P(olong,olat,Alt_part,long_surf(1:nx,1),&
+       !      lat_surf(1,1:ny),Alt_surf,nx,ny)
+       !
+       ! CALL interp2P(olong,olat,pv_part,long_surf(1:nx,1),&
+       !      lat_surf(1,1:ny),pv_surf,nx,ny)
+       !
+       ! CALL interp2P(olong,olat,o3_part,long_surf(1:nx,1),&
+       !      lat_surf(1,1:ny),o3_surf,nx,ny)
 
     ELSE IF (intpm.EQ.2) THEN
-		   U_part = intp2d(olong,olat,long_surf(1:nx,1),&
-            lat_surf(1,1:ny),U_surf,nx,ny)
+       U_part = intp2d(olong,olat,long_surf(1:(nx+1),1),&
+            lat_surf(1,1:ny),U_surf,(nx+1),ny)
 
-       V_part = intp2d(olong,olat,long_surf(1:nx,1),&
-            lat_surf(1,1:ny),V_surf,nx,ny)
+       V_part = intp2d(olong,olat,long_surf(1:(nx+1),1),&
+            lat_surf(1,1:ny),V_surf,(nx+1),ny)
 
-       T_part = intp2d(olong,olat,long_surf(1:nx,1),&
-            lat_surf(1,1:ny),T_surf,nx,ny)
+       T_part = intp2d(olong,olat,long_surf(1:(nx+1),1),&
+            lat_surf(1,1:ny),T_surf,(nx+1),ny)
 
-       P_part = intp2d(olong,olat,long_surf(1:nx,1),&
-            lat_surf(1,1:ny),P_surf,nx,ny)
+       P_part = intp2d(olong,olat,long_surf(1:(nx+1),1),&
+            lat_surf(1,1:ny),P_surf,(nx+1),ny)
 
-       Alt_part = intp2d(olong,olat,long_surf(1:nx,1),&
-            lat_surf(1,1:ny),Alt_surf,nx,ny)
-
-       pv_part = intp2d(olong,olat,long_surf(1:nx,1),&
-            lat_surf(1,1:ny),pv_surf,nx,ny)
-
-       o3_part = intp2d(olong,olat,long_surf(1:nx,1),&
-            lat_surf(1,1:ny),o3_surf,nx,ny)
+       ! Alt_part = intp2d(olong,olat,long_surf(1:nx,1),&
+       !      lat_surf(1,1:ny),Alt_surf,nx,ny)
+       !
+       ! pv_part = intp2d(olong,olat,long_surf(1:nx,1),&
+       !      lat_surf(1,1:ny),pv_surf,nx,ny)
+       !
+       ! o3_part = intp2d(olong,olat,long_surf(1:nx,1),&
+       !      lat_surf(1,1:ny),o3_surf,nx,ny)
     ELSE
       WRITE(*,*) 'Método de interpolación desconocido'
       STOP
@@ -232,8 +202,7 @@ CONTAINS
 
   END SUBROUTINE update
 
-END MODULE thsurf
-
+END MODULE particle
 !----------------------------------------------------------------------
 
 !//////////////////////////////////////////////////////////////////////
