@@ -151,7 +151,7 @@ MODULE thsurf
   IMPLICIT none
   PRIVATE
   INTEGER :: nx,ny,indx,indy
-  PARAMETER (nx=241,ny=121)
+  PARAMETER (nx=145,ny=73)
 
   INTEGER, SAVE :: intpm
   ! For the interpolation the fields must be periodic in longitud
