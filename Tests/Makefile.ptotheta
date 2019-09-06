@@ -7,8 +7,8 @@ F95=gfortran
 
 FFLAGS=-fdefault-real-8 -fbounds-check
 
-LIBS=-L/lib -L/usr/lib -L../Lib -lnetcdff
-INCLUDES = -I/usr/include -I ./
+LIBS=-L/lib -lnetcdff
+INCLUDES = -I/usr/include 
 
 all : $(SOURCE)
 	$(F95) $(FFLAGS) $(INCLUDES) $(SOURCE) -o $(PROGRAM) $(LIBS)

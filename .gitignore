@@ -16,3 +16,6 @@ TrjApp.glade~
 TODO.txt
 f90trj/.directory
 .directory
+Tests/ptotheta
+Tests/interpol
+Tests/*.mod

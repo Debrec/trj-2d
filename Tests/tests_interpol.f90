@@ -44,7 +44,7 @@ CONTAINS
 			DO j = 1,3
 		 		 mval = ywant(j)*cos(2.*pi*xwant(i)/360.)
 		 		 val = intp2d(xwant(i),ywant(j),x,y,array,Nx,Ny)
-		 		 CALL checkTests(assertSimilar(val,mval,'Error al comparar el valor calculado con el interpolado: interp2P'))
+		 		 CALL checkTests(assertSimilar(val,mval,'Error al comparar el valor calculado con el interpolado: intp2d'))
 			END DO
 		END DO
 

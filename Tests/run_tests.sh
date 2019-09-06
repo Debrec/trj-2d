@@ -1,2 +1,2 @@
-./ptotheta.exe
-./interpol.exe
+./ptotheta
+./interpol
