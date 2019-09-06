@@ -5,8 +5,8 @@ SOURCE=interpol.f90 trj_mod.f90 ptotheta.f90 trj_netcdf.f90 date_conv.f90 trj_wi
 F95=gfortran
 
 FFLAGS=-fdefault-real-8 -fbounds-check
-LIBS=-L/home/hernan/netcdf/lib -lnetcdff
-INCLUDES = -I/home/hernan/netcdf/include
+LIBS=-L/usr/lib -lnetcdff
+INCLUDES = -I/usr/include
 
 all : $(SOURCE)
 	$(F95) $(FFLAGS) $(INCLUDES) $(SOURCE) -o $(PROGRAM) $(LIBS)

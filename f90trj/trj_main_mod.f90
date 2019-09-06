@@ -16,12 +16,12 @@ MODULE trj_main_mod
   REAL mLon,iLon, mLat, iLat
   REAL, ALLOCATABLE, PUBLIC :: Long(:,:),Lat(:,:), P(:,:)
   REAL, ALLOCATABLE :: T(:,:), &
-       U(:,:),V(:,:),time(:),PV(:,:),O3(:,:)
+       U(:,:),V(:,:),dtime(:),PV(:,:),O3(:,:)
   INTEGER isec,day,mon,year ! initial date
   REAL theta,rtime,irtime ! theta surface
   INTEGER :: its, ncid_trj  !its (time step, (min)), ncid_trj (netcdf id)
 
-  PUBLIC :: trj_init, trj1, trj_finish
+  PUBLIC :: trj_init, trj_calc, trj_finish
 
 CONTAINS
 
@@ -56,7 +56,7 @@ CONTAINS
     Npart=Npartx*Nparty
 
     ALLOCATE(Long(Npart,2),lat(Npart,2),T(Npart,2), &
-         P(Npart,2),U(Npart,2),V(Npart,2),time(2), &
+         P(Npart,2),U(Npart,2),V(Npart,2),dtime(2), &
          PV(Npart,2),O3(Npart,2))
 
   END SUBROUTINE read_conf_file
@@ -99,7 +99,7 @@ CONTAINS
     CALL open_trj_nc_file(ncid_trj, 'output/trj_output', &
           (/'Long ', 'lat  ','Temp ','Press','Pv   ','O3   '/), &
          (/'Deg','Deg','K  ','mb ','mks','mmr'/),Npart)
-    time(1)=isec
+    dtime(1)=isec
 
     irtime=greg2jul(REAL(year),REAL(mon),REAL(day),REAL(isec)/3600.)
 	CALL updatew(theta,irtime)
@@ -109,7 +109,7 @@ CONTAINS
   !----------------------------------------------------------------------
   !----------------------------------------------------------------------
 
-  SUBROUTINE trj1(time1)
+  SUBROUTINE trj_calc(time)
     !--------------------------------------------------------------------
     USE date_conv, ONLY : jul2greg
     USE winds, ONLY : updatew
@@ -123,21 +123,21 @@ CONTAINS
     !--------------------------------------------------------------------
     IMPLICIT none
     !--------------------------------------------------------------------
-    INTEGER time1
+    INTEGER time
     !        Variables locales
     INTEGER itime,ipart,jtraj,itout
     INTEGER ipartx,iparty,i,j
     REAL tyear,tmonth,tday,thour
     !----------------------------------------------------------------------
 
-    itime=time1
+    itime=time
 
     itout=NINT(REAL((itime-1)*(Nout-1)/(Ntime-1))+1.)
 
     rtime=irtime+REAL(itime-1)*its/60.
     CALL updatew(theta,rtime)
 
-    time(2)=60*its+time(1)
+    dtime(2)=60*its+dtime(1)
     DO ipart=1,Npart
        lat_part=Lat(ipart,1)
        long_part=Long(ipart,1)
@@ -149,19 +149,19 @@ CONTAINS
        PV(ipart,1)=pv_part
        O3(ipart,1)=o3_part
 			 !WRITE(*,*) "Procesando particula: ",ipart
-       CALL trayect(0.,time(1),time(2))
+       CALL trayect(0.,dtime(1),dtime(2))
        CALL Latcheck2()
 
-          Lat(ipart,2)=lat_part
-          Long(ipart,2)=long_part
-          T(ipart,2)=T_part
-          P(ipart,2)=P_part
-          U(ipart,2)=U_part
-          V(ipart,2)=V_part
-          PV(ipart,2)=pv_part
-          O3(ipart,2)=o3_part
+       Lat(ipart,2)=lat_part
+       Long(ipart,2)=long_part
+       T(ipart,2)=T_part
+       P(ipart,2)=P_part
+       U(ipart,2)=U_part
+       V(ipart,2)=V_part
+       PV(ipart,2)=pv_part
+       O3(ipart,2)=o3_part
 
-       END DO
+    END DO
 
     DO i=1,Npart
       CALL rangcheck(Long(i,1),Lat(i,1))
@@ -174,14 +174,14 @@ CONTAINS
     END IF
 
     CALL jul2greg(rtime,tyear,tmonth,tday,thour)
-    WRITE(0,FMT='(A,F12.2,I4,X,I2.2,"/",I2.2,"/",I4,X,I2.2,":",I2.2,":",I2.2,X,"%",F5.2)') 'Tiempo',time(1),itime, &
+    WRITE(0,FMT='(A,F12.2,I4,X,I2.2,"/",I2.2,"/",I4,X,I2.2,":",I2.2,":",I2.2,X,"%",F5.2)') 'Tiempo',dtime(1),itime, &
          NINT(tday),NINT(tmonth),NINT(tyear),FLOOR(thour),FLOOR((thour-FLOOR(thour))*60.), &
          FLOOR(((thour-FLOOR(thour))*60.-FLOOR((thour-FLOOR(thour))*60.))*60.), REAL(100.*REAL(itime)/REAL(Ntime))
 
     Lat(:,1)=Lat(:,2)
     Long(:,1)=Long(:,2)
 
-    time(1)=time(2)
+    dtime(1)=dtime(2)
     IF(itime.EQ.(Ntime-1)) THEN
        DO i=1,Npart
           CALL rangcheck(Long(i,2),Lat(i,2))
@@ -189,7 +189,7 @@ CONTAINS
        rtime=irtime+REAL(Ntime-1)*its/60.
        CALL jul2greg(rtime,tyear,tmonth,tday,thour)
        itime = itime + 1
-       WRITE(0,FMT='(A,F12.2,I4,X,I2.2,"/",I2.2,"/",I4,X,I2.2,":",I2.2,":",I2.2,X,"%",F6.2)') 'Tiempo',time(1),itime, &
+       WRITE(0,FMT='(A,F12.2,I4,X,I2.2,"/",I2.2,"/",I4,X,I2.2,":",I2.2,":",I2.2,X,"%",F6.2)') 'Tiempo',dtime(1),itime, &
        NINT(tday),NINT(tmonth),NINT(tyear),FLOOR(thour),FLOOR((thour-FLOOR(thour))*60.), &
        FLOOR(((thour-FLOOR(thour))*60.-FLOOR((thour-FLOOR(thour))*60.))*60.),REAL(100.*REAL(itime)/REAL(Ntime))
 
@@ -199,14 +199,14 @@ CONTAINS
     END IF
 
     !--------------------------------------------------------------------
-  END SUBROUTINE trj1
+  END SUBROUTINE trj_calc
 
   SUBROUTINE trj_finish
     USE winds, ONLY : winds_finish
     IMPLICIT none
     CALL close_trj_nc_file(ncid_trj)
     DEALLOCATE(Long,lat,T, &
-         P,U,V,time, &
+         P,U,V,dtime, &
          PV,O3)
     WRITE(0,*)
     WRITE(0,*) 'Terminado'
@@ -256,7 +256,7 @@ SUBROUTINE trj_main
   CALL trj_init
 
   DO I=1,Ntime-1
-     CALL trj1(I)
+     CALL trj_calc(I)
 	 OPEN(13,FILE='pbar.dat')
 		WRITE(13,*)100*I/(Ntime-1)
 	 CLOSE(13)
