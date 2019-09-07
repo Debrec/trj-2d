@@ -6,8 +6,8 @@
 		INTEGER :: I
 		REAL :: press(8)
 		REAl :: temp(8)
-		REAL :: theta(8), theta2(8)
-		REAL :: tempp,tempth
+		REAL :: theta(8), theta2(8),var(8)
+		REAL :: tempp,tempth,varp
 
 	CONTAINS
 		SUBROUTINE test_ptotheta
@@ -17,6 +17,7 @@
 			press=(/1000.,800.,500.,100.,50.,10.,5.,1./)
 			temp=(/250.,260.,245.,216.,220.,225.,230.,235./)
 			theta=(/250.9,278.2,299.8,418.8,520.1,842.9,1050.6,1700.8/);
+			var=(/500.,450.,300.,200.,100.,50.,70.,80./)
 
 			DO I=1,8
 				theta2(I)=ctheta(press(I),temp(I))
@@ -27,7 +28,10 @@
 			CALL checktests(assertSimilar(tempth,216.2,"Temperaturas distintas"))
 
 			tempp = theta2p(theta,temp,100.,temp)
-			CALL checktests(assertSimilar(tempth,216.0,"Temperaturas distintas"))
+			CALL checktests(assertSimilar(tempp,216.0,"Temperaturas distintas"))
+
+			varp = theta2p(theta,temp,100.,var)
+			CALL checktests(assertSimilar(varp,200.0,"Variables distintas"))
 
 		END SUBROUTINE test_ptotheta
 	END MODULE tests_ptotheta
