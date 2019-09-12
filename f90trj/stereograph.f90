@@ -1,13 +1,11 @@
 !----------------------------------------------------------------------
 !----------------------------------------------------------------------
-! Last change March, 2006
 ! This software is part of trj, a two dimensional trajectory model,
 ! and currently experimental 3D interface.
 ! Stereographic to geographic translation code
-! Autor : Hern·n H. G. Braile
-! Email : hgbraile@yahoo.com.ar
+! Autor : Hern√°n H. G. Braile
 !----------------------------------------------------------------------
-!----------------------------------------------------------------------  
+!----------------------------------------------------------------------
        SUBROUTINE ang_to_str(rlong,rlat,xstr,ystr)
          USE parametros
 	 IMPLICIT none
@@ -53,7 +51,7 @@
              (cos(rlat/2)-sin(rlat/2)))
 
        END SUBROUTINE strwinds
-       
+
        SUBROUTINE ang_to_strN(rlong,rlat,xstr,ystr)
          USE parametros
 	 IMPLICIT none
@@ -66,7 +64,7 @@
          ystr=-M*tan(Pi/4-rlat/2)*cos(rlong);
 
        END SUBROUTINE ang_to_strN
- 
+
        SUBROUTINE str_to_angN(rlong,rlat,xstr,ystr)
          USE parametros
 	 IMPLICIT none
@@ -81,7 +79,7 @@
          if(ystr.EQ.0)rlong=0
 	 rlat=-2.*ATAN(sqrt(xstr*xstr+ystr*ystr)/M)+Pi/2.;
        END SUBROUTINE str_to_angN
-       
+
        SUBROUTINE strwindsN(rlong,rlat,U,V,Ustr,Vstr)
         USE parametros
         IMPLICIT none
@@ -98,4 +96,4 @@
              +M*U*sin(rlong)*sqrt(2.)/(2*Rt*cos(Pi/4-rlat/2)*&
              (cos(rlat/2)+sin(rlat/2)))
 
-       END SUBROUTINE strwindsN       
+       END SUBROUTINE strwindsN
