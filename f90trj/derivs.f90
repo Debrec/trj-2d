@@ -1,11 +1,9 @@
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
-! Enero 2015
 ! Este modulo es parte del modelo trj.
 ! Subrutinas auxiliares para obtener las derivadas temporales usadas en odeint
 ! dx/dt y dy/dt, Coordenadas locales curvilineas.
 ! Autor : Hernán H. G. Braile
-! Email : hbraile@gmail.com
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------

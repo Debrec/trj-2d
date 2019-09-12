@@ -1,10 +1,8 @@
 !----------------------------------------------------------------------
 !----------------------------------------------------------------------
-! Enero 2015
 ! Este modulo es parte del modelo trj.
 ! Subrutinas auxiliares para para realizar las interpolaciones
-! Autor : Hern�n H. G. Braile
-! Email : hbraile@gmail.com
+! Autor : Hernán H. G. Braile
 !----------------------------------------------------------------------
 !----------------------------------------------------------------------
 	MODULE interpolacion
