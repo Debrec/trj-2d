@@ -47,7 +47,7 @@ using namespace std;
 #define ID_BUTTON_RESET 603
 #define ID_BUTTON_RUN 604
 
-extern "C" void trj_();
+extern "C" void trj_main_();
 
 class datos {
 public:
@@ -376,7 +376,7 @@ int NombreArchivo(HWND hwnd,string &fileName) {
 }
 
 void * run_model(void *p) {
-	trj_();
+	trj_main_();
 	pthread_exit(NULL);
 	return 0;
 }
