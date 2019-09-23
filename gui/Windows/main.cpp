@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
-//#include <pthread.h>
+#include <pthread.h>
 
 using namespace std;
 
@@ -46,6 +46,8 @@ using namespace std;
 #define ID_BUTTON_CANCELAR 602
 #define ID_BUTTON_RESET 603
 #define ID_BUTTON_RUN 604
+#define ID_BUTTON_PAUSAR 605
+#define ID_BUTTON_REASUMIR 606
 
 extern "C" void trj_main_();
 
@@ -375,6 +377,20 @@ int NombreArchivo(HWND hwnd,string &fileName) {
     return 0;
 }
 
+void continuar() {
+	std::ofstream out("status.dat");
+	out<<0<<std::endl;		
+	out.close();
+}
+
+void pausar() {
+	std::ofstream out("status.dat");
+	out<<1<<std::endl;		
+	out.close();			
+}
+
+static int status=0;
+
 void * run_model(void *p) {
 	trj_main_();
 	pthread_exit(NULL);
@@ -386,10 +402,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 {
     static datos data;
     static HBRUSH pincel;
-	static int var=1;
 	static pthread_t thread;
-	//static HANDLE Handle_Of_Thread_1 = 0;
-	//int Data_Of_Thread_1 = 1;
     static string nombreArchivo;
 
     switch (msg)                /* manipulador del mensaje */
@@ -397,7 +410,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
         case WM_DESTROY:
 			pthread_cancel(thread);
 			pthread_exit(NULL);
-			//CloseHandle(Handle_Of_Thread_1);
 			DeleteObject(pincel);
 			DeleteObject(hfont);
 			PostQuitMessage(0);    /* env�a un mensaje WM_QUIT a la cola de mensajes */
@@ -405,32 +417,28 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
         case WM_COMMAND:
             if (wParam == ID_BUTTON_GUARDAR) {
                 changeData(hwnd,data);
-                /*NombreArchivo(hwnd,nombreArchivo);
-                if(!GuardarArchivo(nombreArchivo,data)) {
-                    MessageBox(hwnd,(TCHAR*)"Archivo cfg guardado correctamente","",0);
-                }*/
 				if(MessageBox(hwnd,(TCHAR*)"Sobrescribir trj-2d.cfg","",MB_YESNO)==IDYES) {
 					if(!GuardarArchivo("trj-2d.cfg",data)) {
 	                    MessageBox(hwnd,(TCHAR*)"Archivo cfg guardado correctamente","",0);
 	                }
 				}
             } else if (wParam == ID_BUTTON_RESET ){
-                //LeerArchivo("trj-2d.cfg",data);
                 Resetear(hwnd,data);
             } else if (wParam == ID_BUTTON_CANCELAR) {
                 SendMessage(hwnd,WM_CLOSE,wParam,lParam);
             } else if (wParam == ID_BUTTON_RUN) {
-				if (var) {
-					// variable to hold handle of Thread 1
-
-					//run_model(&Data_Of_Thread_1);
-					// Create thread 1.
-					//Handle_Of_Thread_1 = CreateThread( NULL, 0,run_model, &Data_Of_Thread_1, 0, NULL);
-					/*if ( Handle_Of_Thread_1 == NULL)
-						ExitProcess(Data_Of_Thread_1);*/
-
+				if (status==0) {
 					pthread_create(&thread,NULL,run_model,NULL);
-					var = 0;
+					status = 1;
+                    SetDlgItemText(hwnd,ID_BUTTON_RUN,"Pausar");
+                } else if (status==1) {
+                    pausar();
+                    status=2;
+                    SetDlgItemText(hwnd,ID_BUTTON_RUN,"Continuar");
+                } else if(status==2) {
+                    continuar();
+                    status=1;
+                    SetDlgItemText(hwnd,ID_BUTTON_RUN,"Continuar");
 				} else {
 					MessageBox(hwnd,(TCHAR*)"Ya esta corriendo el modelo, no se hace nada","",0);
 				}
@@ -446,19 +454,21 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 
             CrearBoton(hwnd,lParam,36,300,60,20,ID_BUTTON_GUARDAR,"Guardar");
             CrearBoton(hwnd,lParam,106,300,60,20,ID_BUTTON_RESET,"Reset");
-            CrearBoton(hwnd,lParam,176,300,60,20,ID_BUTTON_CANCELAR,"Cancelar");
-            CrearBoton(hwnd,lParam,246,300,60,20,ID_BUTTON_RUN,"RUN");
-           pincel = CreateSolidBrush(RGB(0,0,0));
-				   hfont = (HFONT)GetStockObject( DEFAULT_GUI_FONT );
+            CrearBoton(hwnd,lParam,176,300,70,20,ID_BUTTON_CANCELAR,"Salir");
+            CrearBoton(hwnd,lParam,256,300,70,20,ID_BUTTON_RUN,"Correr");
+            //CrearBoton(hwnd,lParam,326,300,70,20,ID_BUTTON_PAUSAR,"Pausar");
+            //CrearBoton(hwnd,lParam,406,300,70,20,ID_BUTTON_REASUMIR,"Reasumir");
+            pincel = CreateSolidBrush(RGB(0,0,0));
+			hfont = (HFONT)GetStockObject( DEFAULT_GUI_FONT );
            return 0;
         case WM_CTLCOLOREDIT:
            SetBkColor((HDC)wParam, RGB(0,0,0));
            SetTextColor((HDC)wParam, RGB(255,255,255));
            return (LRESULT)pincel;
-					/* case WM_CTLCOLORSTATIC:
-	      	 SetBkColor((HDC)wParam, GetSysColor(COLOR_BACKGROUND));
+		case WM_CTLCOLORSTATIC:
+	      	 SetBkColor((HDC)wParam,RGB(100,100,100));
 	         SetTextColor((HDC)wParam, RGB(255,255,255));
-	        return (LRESULT)pincel;*/
+	         return (LRESULT)pincel;
         default:                  /* para los mensajes de los que no nos ocupamos */
            return DefWindowProc(hwnd, msg, wParam, lParam);
     }
