@@ -15,9 +15,9 @@ INCLUDES = -I/usr/include
 #	$(F95) $(FFLAGS) $(INCLUDES) $(SOURCE) -o $(PROGRAM) $(LIBS)
 #
 
-all : $(SRCSTR) $(SRCRD)
+#all : $(SRCSTR) $(SRCRD)
 	#$(F95) $(FFLAGS) $(INCLUDES) $(SRCSTR) -o $(PRGSTR) $(LIBS)
-	$(F95) $(FFLAGS) $(INCLUDES) $(SRCRD) -o $(PRGRD) $(LIBS)
+#	$(F95) $(FFLAGS) $(INCLUDES) $(SRCRD) -o $(PRGRD) $(LIBS)
 
 #$(PRGSTR) : $(SRCSTR)
 #	$(F95) $(FFLAGS) $(INCLUDES) $(SRCSTR) -o $(PRGSTR) $(LIBS)
